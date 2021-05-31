@@ -26,6 +26,7 @@ var cellArray = [];			// Двумерный массив тайлов.
 
 var stepCellArray = [];	// Массив тайлов, на которые может сходить юнит за этот ход
 var attackCellArray = [];	// Массив разрешённых к атаке юнитом тайлов за этот ход
+var buildRadiusArray = [];	// Массив тайлов где юнит может строить
 
 var goldPointArray = [];	// Массив точек добычи ресурсов
 var relicPoint = {
@@ -137,22 +138,28 @@ for (var cellX = 0; cellX<canvas.width/cellWidth; cellX++) {
 /////////// Генерация точек ресурсов
 
 var sideRelicsCount = getRandomInt(2, 5);
-
-for (var i = 0; i < sideRelicsCount; i++) {
+var i = 0;
+while (i < sideRelicsCount) {
 	var goldX = (getRandomInt(2, (canvas.width/2 - cellWidth)/cellWidth)*cellWidth);
-	var goldY = (getRandomInt(0, canvas.width/cellWidth)*cellWidth);
-	goldPointArray.push({
-		x: goldX-cellWidth,
-		y: goldY-cellHeight,
-		side: "none"
-	});
-	goldPointArray.push({
-		x: canvas.width-goldX,
-		y: canvas.height-goldY,
-		side: "none"
-	});
+	var goldY = (getRandomInt(0, canvas.height/cellHeight)*cellHeight);
+	var check_gold = goldPointArray.filter(function(e){
+		return e.x==goldX - cellWidth &&  e.y==goldY-cellHeight;
+	});	
+	if(check_gold.length == 0){
+		goldPointArray.push({
+			x: goldX-cellWidth,
+			y: goldY-cellHeight,
+			side: "none"
+		});
+		goldPointArray.push({
+			x: canvas.width-goldX,
+			y: canvas.height-goldY,
+			side: "none"
+		});
+		i++;
+	}
 }
-
+console.log(goldPointArray);
 ///////////
 
 /////////// Функции
@@ -180,6 +187,7 @@ function takeTurn(player){
 			});
 			rightPlayerMoney += 50*(check_money.length+1);
 			currentUnit = [];
+			buildRadiusArray = [];
 			stepCellArray = [];
 			attackCellArray = [];
 			leftPlayerUnitsArray.forEach(function(item){
@@ -200,6 +208,7 @@ function takeTurn(player){
 			});
 			leftPlayerMoney += 50*(check_money.length+1);
 			currentUnit = [];
+			buildRadiusArray = [];
 			stepCellArray = [];
 			attackCellArray = [];
 			rightPlayerUnitsArray.forEach(function(item){
@@ -237,6 +246,52 @@ function selectUnitMenu(unitName){
 
 function getStepCells(unit){
 	currentUnit = unit;
+	var radius_cells = [
+				{
+					x:currentUnit[0].x+cellWidth,
+					y:currentUnit[0].y
+				},
+				{
+					x:currentUnit[0].x+cellWidth,
+					y:currentUnit[0].y+cellHeight
+				},
+				{
+					x:currentUnit[0].x,
+					y:currentUnit[0].y+cellHeight
+				},
+				{
+					x:currentUnit[0].x-cellWidth,
+					y:currentUnit[0].y+cellHeight
+				},
+				{
+					x:currentUnit[0].x-cellWidth,
+					y:currentUnit[0].y
+				},
+				{
+					x:currentUnit[0].x-cellWidth,
+					y:currentUnit[0].y-cellHeight
+				},
+				{
+					x:currentUnit[0].x,
+					y:currentUnit[0].y-cellHeight
+				},
+				{
+					x:currentUnit[0].x+cellWidth,
+					y:currentUnit[0].y-cellHeight
+				}
+			];
+	radius_cells.forEach(function(item){
+		var x = item.x;
+		var y = item.y;
+		goldPointArray.forEach(function(item){
+			if(x==item.x && y==item.y && item.side == "none"){
+				buildRadiusArray.push({
+					x:x,
+					y:y
+				});
+			}
+		});
+	});
 	if(unit.length>0 && unit[0].turnStep == 1){
 		for (var step = unit[0].speed; step>=0; step--) {
 			for (var i = step; i>0; i--){
@@ -297,14 +352,19 @@ function getAttackCells(){
 //// Передвижение юнитов
 
 function unitMove(currentUnitArray){
-	currentUnit.forEach(function(item){
-			item.x = cursorX;
-			item.y = cursorY;
-			item.cellX = cursorX/cellWidth;
-			item.cellY = cursorY/cellHeight;
-			item.turnStep = 0;
-			console.log("Юнит сходил");
+	var check_buildings = goldPointArray.filter(function(e){
+		return e.x==cursorX && e.y==cursorY && e.side != "none";
 	});
+	if(check_buildings.length == 0){
+		currentUnit.forEach(function(item){
+				item.x = cursorX;
+				item.y = cursorY;
+				item.cellX = cursorX/cellWidth;
+				item.cellY = cursorY/cellHeight;
+				item.turnStep = 0;
+				console.log("Юнит сходил");
+		});
+	}
 }
 
 ////
@@ -350,7 +410,93 @@ function getCursorPosition(canvas, event) {
     console.log('x'+cursorX+'---y'+cursorY);
     if(event.which==3) // правый клик
 	{
-			
+		console.log("ПКМ");
+		if(currentUnit.length>0){
+			var check_units;
+			var check_enemy;
+			var currentArray;
+			switch(playerTurn){
+				case "right":
+					console.log("Правый");
+					check_units = rightPlayerUnitsArray.filter(function(e){
+						return e.x == cursorX && e.y==cursorY && e.type == currentUnit[0].type;
+					});
+					break;
+				case "left":
+					console.log("Левый");
+					check_units = leftPlayerUnitsArray.filter(function(e){
+						return e.x == cursorX && e.y==cursorY && e.type == currentUnit[0].type;
+					});
+					break;
+			}
+			var check_step = stepCellArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY;
+			});
+			var check_gold = buildRadiusArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY;
+			});
+			if(check_units.length > 0 && check_step.length > 0){
+
+				switch(playerTurn){
+					case "left":
+						unitMove(leftPlayerUnitsArray);
+						break;
+					case "right":
+						unitMove(rightPlayerUnitsArray);
+						break;
+				}
+				currentUnit = [];
+				buildRadiusArray = [];
+				stepCellArray = [];
+				attackCellArray = [];
+			}
+			else if(check_gold.length>0 && currentUnit[0].turnAtack == 1){
+				goldPointArray.forEach(function(item){
+					if(check_gold[0].x == item.x && check_gold[0].y == item.y){
+						item.side = playerTurn;
+						switch(playerTurn){
+							case "right":
+								rightPlayerMoney -= 100;
+								break;
+							case "left":
+								leftPlayerMoney -= 100;
+								break;
+						}
+					}
+				});
+				currentUnit = [];
+				buildRadiusArray = [];
+				stepCellArray = [];
+				attackCellArray = [];
+			}
+		}
+		else{
+			var check_units;
+			switch(playerTurn){
+				case "right":
+					check_units = rightPlayerUnitsArray.filter(function(e){
+						return e.x==cursorX && e.y == cursorY;
+					});
+					break;
+				case "left":
+					check_units = leftPlayerUnitsArray.filter(function(e){
+						return e.x==cursorX && e.y == cursorY;
+					});
+					break;
+			}
+			if(check_units.length >= 2 && check_units[0].turnStep == 1){
+				if(check_units[0].y>0){
+					check_units[0].y -= cellHeight;
+					check_units[0].cellY -= 1;
+					check_units[0].turnStep = 0;
+				}
+				else{
+					check_units[0].y += cellHeight;
+					check_units[0].cellY += 1;
+					check_units[0].turnStep = 0;
+				}
+			}
+		}
 	}
 	if(event.which==1) // левый клик
 	{ 
@@ -392,11 +538,13 @@ function getCursorPosition(canvas, event) {
 									}
 									stepCellArray = [];
 									currentUnit = [];
+									buildRadiusArray = [];
 									attackCellArray = [];
 								}
 								else{
 									stepCellArray = [];
 									currentUnit = [];
+									buildRadiusArray = [];
 									attackCellArray = [];
 								}
 							break;
@@ -434,11 +582,13 @@ function getCursorPosition(canvas, event) {
 									}
 									stepCellArray = [];
 									currentUnit = [];
+									buildRadiusArray = [];
 									attackCellArray = [];
 								}
 								else{
 									stepCellArray = [];
 									currentUnit = [];
+									buildRadiusArray = [];
 									attackCellArray = [];
 								}
 							break;
@@ -536,9 +686,18 @@ function game(){
 	//
 	// Отрисовка реликтовых точек
 	goldPointArray.forEach(function(item){
-		context.drawImage(goldPoint, item.x, item.y, cellWidth, cellHeight);
+		switch(item.side){
+			case "right":
+				context.drawImage(mine_right, item.x, item.y, cellWidth, cellHeight);
+				break;
+			case "left":
+				context.drawImage(mine_left, item.x, item.y, cellWidth, cellHeight);
+				break;
+			default:
+				context.drawImage(goldPoint, item.x, item.y, cellWidth, cellHeight);
+				break;
+		}
 	});
-
 	context.drawImage(relicPointCell, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
 	//
 	// Отрисовка юнитов на поле
@@ -564,6 +723,13 @@ function game(){
 	// Отрисовка атакуемых юнитов
 	if(attackCellArray.length > 0){
 		attackCellArray.forEach(function(item){
+			context.drawImage(cellAttack, item.x, item.y, cellWidth, cellHeight);
+		});
+	}
+	//
+	// Отрисовка точек где можно строить
+	if(buildRadiusArray.length > 0){
+		buildRadiusArray.forEach(function(item){
 			context.drawImage(cellAttack, item.x, item.y, cellWidth, cellHeight);
 		});
 	}
