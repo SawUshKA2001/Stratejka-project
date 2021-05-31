@@ -16,10 +16,10 @@ var units = $("section.unit");
 
 /////////// Переменные
 
-var cellWidth = 60;		// Ширина тайла.
-var cellHeight = 60;	// Высота тайла.
+var cellWidth = 30;		// Ширина тайла.
+var cellHeight = 30;	// Высота тайла.
 
-canvas.width = 13*cellWidth;	// Задание ширины поля.
+canvas.width = 25*cellWidth;	// Задание ширины поля.
 canvas.height = 13*cellHeight;	// Задание высоты поля.
 
 var cellArray = [];			// Двумерный массив тайлов.
@@ -53,7 +53,7 @@ var rightPlayerMoney = 950;
 var leftPlayerHealth = 1000;
 var rightPlayerHealth = 1000;
 
-var currentUnit = [];	// Переменнаядля хранения выбранного юнита
+var currentUnit = [];	// Переменная для хранения выбранного юнита
 
 ///////////
 
