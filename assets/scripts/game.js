@@ -355,7 +355,7 @@ function unitMove(currentUnitArray){
 	var check_buildings = goldPointArray.filter(function(e){
 		return e.x==cursorX && e.y==cursorY && e.side != "none";
 	});
-	if(check_buildings.length == 0){
+	if(check_buildings.length == 0 && !(cursorX==relicPoint.x && cursorY==relicPoint.y)){
 		currentUnit.forEach(function(item){
 				item.x = cursorX;
 				item.y = cursorY;
@@ -462,6 +462,7 @@ function getCursorPosition(canvas, event) {
 								leftPlayerMoney -= 100;
 								break;
 						}
+						currentUnit[0].turnAtack = 0;
 					}
 				});
 				currentUnit = [];
