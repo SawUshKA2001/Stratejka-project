@@ -25,22 +25,22 @@ input.play{
 }
 
 div.game{
-	width: 1000px;
-	height: 720px;
-	background: red;
+	width: 1120px;
+	height: 780px;
+	/*background: red;*/
 	margin:auto;
 	margin-top: 6.25%;
 	display: none;
 }
 div.game canvas{
-	width: 720px;
-	height: 720px;
+	width: 780px;
+	height: 780px;
 	float: left;
 	background: green;
 }
 section.player_menu{
 	width: 280px;
-	height: 720px;
+	height: 780px;
 	float: left;
 }
 section.left_player{

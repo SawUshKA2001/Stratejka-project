@@ -19,15 +19,28 @@ var units = $("section.unit");
 var cellWidth = 60;		// Ширина тайла.
 var cellHeight = 60;	// Высота тайла.
 
-canvas.width = 12*cellWidth;	// Задание ширины поля.
-canvas.height = 12*cellHeight;	// Задание высоты поля.
+canvas.width = 13*cellWidth;	// Задание ширины поля.
+canvas.height = 13*cellHeight;	// Задание высоты поля.
 
 var cellArray = [];			// Двумерный массив тайлов.
 
 var stepCellArray = [];	// Массив тайлов, на которые может сходить юнит за этот ход
 var attackCellArray = [];	// Массив разрешённых к атаке юнитом тайлов за этот ход
 
+var goldPointArray = [];	// Массив точек добычи ресурсов
+var relicPoint = {
+	x: (((canvas.width/cellWidth)/2)*cellWidth)-cellWidth/2,
+	y: (((canvas.height/cellHeight)/2)*cellHeight)-cellHeight/2,
+	side: "none",
+	maxHealth: 250,
+	currentHealth: 0
+};
+
+var relicUnitCoolDown = 0;
+
 var playerTurn = "left";	// Переменная содержащая информацию о том, чей ход.
+
+var turnCount = 0;
 
 var selectedUnitMenu = "cursor";	// Имя выбранного в меню покупки юнита 
 
@@ -54,6 +67,14 @@ var cellSand = new Image();
 cellSand.src = "assets/images/tiles/sand.png";
 var cellAttack = new Image();
 cellAttack.src = "assets/images/tiles/attack.png";
+var goldPoint = new Image();
+goldPoint.src = "assets/images/tiles/gold_point.png";
+var mine_left = new Image();
+mine_left.src = "assets/images/tiles/mine_left.png";
+var mine_right = new Image();
+mine_right.src = "assets/images/tiles/mine_right.png";
+var relicPointCell = new Image();
+relicPointCell.src = "assets/images/tiles/relic_point.png";
 
 ////
 
@@ -113,7 +134,36 @@ for (var cellX = 0; cellX<canvas.width/cellWidth; cellX++) {
 
 ///////////
 
+/////////// Генерация точек ресурсов
+
+var sideRelicsCount = getRandomInt(2, 5);
+
+for (var i = 0; i < sideRelicsCount; i++) {
+	var goldX = (getRandomInt(2, (canvas.width/2 - cellWidth)/cellWidth)*cellWidth);
+	var goldY = (getRandomInt(0, canvas.width/cellWidth)*cellWidth);
+	goldPointArray.push({
+		x: goldX-cellWidth,
+		y: goldY-cellHeight,
+		side: "none"
+	});
+	goldPointArray.push({
+		x: canvas.width-goldX,
+		y: canvas.height-goldY,
+		side: "none"
+	});
+}
+
+///////////
+
 /////////// Функции
+
+//// Рандомизация числа в диапозоне
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min) + 1) + min;
+}
+
+////
 
 //// Передача хода
 
@@ -125,7 +175,10 @@ function takeTurn(player){
 			playerTurn = "right";
 			leftPlayerMenu.addClass("non-display");
 			rightPlayerMenu.removeClass("non-display");
-			rightPlayerMoney += 50;
+			var check_money = goldPointArray.filter(function(e){
+				return e.side == "right";
+			});
+			rightPlayerMoney += 50*(check_money.length+1);
 			currentUnit = [];
 			stepCellArray = [];
 			attackCellArray = [];
@@ -142,7 +195,10 @@ function takeTurn(player){
 			playerTurn = "left";
 			rightPlayerMenu.addClass("non-display");
 			leftPlayerMenu.removeClass("non-display");
-			leftPlayerMoney += 50;
+			var check_money = goldPointArray.filter(function(e){
+				return e.side == "left";
+			});
+			leftPlayerMoney += 50*(check_money.length+1);
 			currentUnit = [];
 			stepCellArray = [];
 			attackCellArray = [];
@@ -154,6 +210,7 @@ function takeTurn(player){
 				item.turnStep = 1;
 				item.turnAtack = 1;
 			});
+			turnCount+=1;
 			break;
 	}
 }
@@ -476,6 +533,13 @@ function game(){
 	stepCellArray.forEach(function(item){
 		context.drawImage(cellSand, item.x, item.y, cellWidth, cellHeight)
 	});
+	//
+	// Отрисовка реликтовых точек
+	goldPointArray.forEach(function(item){
+		context.drawImage(goldPoint, item.x, item.y, cellWidth, cellHeight);
+	});
+
+	context.drawImage(relicPointCell, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
 	//
 	// Отрисовка юнитов на поле
 	if(leftPlayerUnitsArray.length > 0){
