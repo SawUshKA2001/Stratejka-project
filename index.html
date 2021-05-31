@@ -5,7 +5,6 @@
 	<link rel="stylesheet" type="text/css" href="assets/styles/style.css">
 	<script type="text/javascript" src="assets/scripts/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript" src="assets/scripts/menu.js"></script>
-	<script type="text/javascript">document.addEventListener('contextmenu', event => event.preventDefault());</script>
 </head>
 <body>
 	<div class="menu">
@@ -31,7 +30,29 @@
 
 			<input type="submit" class="end_turn" name="leftTurnEnd" value="Закончить ход"></input>
 		</section>
-		<canvas id="gameScreen"></canvas>
+		
+		<section class="ui">
+            <canvas id="gameScreen"></canvas>	
+            <section class="bottom_ui">
+                <section class="info_player">
+                    <p name="gold_per_tick">Золота за ход:999999</p>
+                    <p name="captured_points">Захвачено точек:999999</p>
+                    <p name="units_on_battleground">Войска:999999</p>
+                </section>
+                 <section class="info_selected_unit_img">
+                    <img src="assets/images/units/rat_left.jpg" alt="selected_unit">
+                </section>
+                <section class="info_selected_unit">
+                    <p name="unit_hp">Здоровье:99999</p>
+                    <p name="unit_dmg">Урон:99999</p>
+                    <p name="unit_energy">Энергия:9999</p>
+                </section>
+                <section class="end_step_button">
+                    <button>Закончить ход</button>
+                </section>
+            </section>
+        </section>
+		    
 		<section class="player_menu right_player non-display">
 			<section class="info">
 				<img src="assets/images/icons/money.png" alt="money">
@@ -55,7 +76,7 @@
 	<div class="end_game">
 		
 	</div>
-
+	
 
 	<script type="text/javascript" src="assets/scripts/game.js"></script>
 </body>
