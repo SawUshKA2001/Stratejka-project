@@ -10,7 +10,7 @@ var rightPlayerHealthRender = $("section.right_player section.info p.health");
 var leftPlayerMoneyRender = $("section.left_player section.info p.money");
 var rightPlayerMoneyRender = $("section.right_player section.info p.money");
 
-var endOfTurn = $("input.end_turn");
+var endOfTurn = $("section.end_step_button button");
 
 var units = $("section.unit");
 
@@ -174,11 +174,11 @@ function getRandomInt(min, max) {
 
 //// Передача хода
 
-function takeTurn(player){
+function takeTurn(){
 	units.removeClass("select_unit");
 	selectedUnitMenu = "cursor";
-	switch(player){
-		case "leftTurnEnd":
+	switch(playerTurn){
+		case "left":
 			playerTurn = "right";
 			leftPlayerMenu.addClass("non-display");
 			rightPlayerMenu.removeClass("non-display");
@@ -199,7 +199,7 @@ function takeTurn(player){
 				item.turnAtack = 1;
 			});
 			break;
-		case "rightTurnEnd":
+		case "right":
 			playerTurn = "left";
 			rightPlayerMenu.addClass("non-display");
 			leftPlayerMenu.removeClass("non-display");
@@ -227,7 +227,7 @@ function takeTurn(player){
 // Вызов функции смены хода при клике на кнопку
 
 endOfTurn.click(function(){
-	takeTurn($(this).attr("name"));
+	takeTurn();
 });
 
 //
