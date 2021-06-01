@@ -47,6 +47,9 @@ var relicPoint = {
 	currentHealth: 0
 };
 
+var leftHeroHitboxArray = [];
+var rightHeroHitboxArray = [];
+
 var relicUnitCoolDown = 0;
 
 var playerTurn = "left";	// Переменная содержащая информацию о том, чей ход.
@@ -90,6 +93,8 @@ var leftRelicPoint =  new Image();
 leftRelicPoint.src = "assets/images/tiles/left_relic_point.png";
 var rightRelicPoint =  new Image();
 rightRelicPoint.src = "assets/images/tiles/right_relic_point.png";
+var heroHitBoxCell =  new Image();
+heroHitBoxCell.src = "assets/images/tiles/hero_hitbox.png";
 
 ////
 
@@ -147,14 +152,27 @@ for (var cellX = 0; cellX<canvas.width/cellWidth; cellX++) {
 	}
 }
 
+cellArray[0].forEach(function(item){
+	leftHeroHitboxArray.push({
+		x: 0,
+		y: item.y
+	});
+	rightHeroHitboxArray.push({
+		x: canvas.width-cellWidth,
+		y: item.y
+	});
+});
+
 ///////////
+
+
 
 /////////// Генерация точек ресурсов
 
 var sideRelicsCount = getRandomInt(2, 5);
 var i = 0;
 while (i < sideRelicsCount) {
-	var goldX = (getRandomInt(2, (canvas.width/2 - cellWidth)/cellWidth)*cellWidth);
+	var goldX = (getRandomInt(3, (canvas.width/2 - cellWidth)/cellWidth)*cellWidth);
 	var goldY = (getRandomInt(0, canvas.height/cellHeight)*cellHeight);
 	var check_gold = goldPointArray.filter(function(e){
 		return e.x==goldX - cellWidth &&  e.y==goldY-cellHeight;
@@ -398,7 +416,7 @@ function unitMove(currentUnitArray){
 			});
 			break;
 	}
-	if(check_step.length > 0 && check_enemy.length == 0 && check_other_units == 0 && check_buildings.length == 0 && !(cursorX==relicPoint.x && cursorY==relicPoint.y)){
+	if(cursorX>0 && cursorX<canvas.width-cellWidth && check_step.length > 0 && check_enemy.length == 0 && check_other_units == 0 && check_buildings.length == 0 && !(cursorX==relicPoint.x && cursorY==relicPoint.y)){
 		currentUnit.forEach(function(item){
 				item.x = cursorX;
 				item.y = cursorY;
@@ -676,7 +694,7 @@ function getCursorPosition(canvas, event) {
 							var check_enemy = leftPlayerUnitsArray.filter(function(e){
 								return e.x==cursorX && e.y==cursorY;
 							});
-							if(rightPlayerMoney>=unitsArray[selectedUnitMenu].price && check_other_units.length == 0 && check_enemy == 0 && cursorX >= canvas.width-2*cellWidth){
+							if(rightPlayerMoney>=unitsArray[selectedUnitMenu].price && check_other_units.length == 0 && check_enemy == 0 && cursorX >= canvas.width-3*cellWidth && cursorX<canvas.width-cellWidth){
 								rightPlayerUnitsArray.push({
 									x: cursorX,
 									y: cursorY,
@@ -702,7 +720,7 @@ function getCursorPosition(canvas, event) {
 							var check_enemy = rightPlayerUnitsArray.filter(function(e){
 								return e.x==cursorX && e.y==cursorY;
 							});
-							if(leftPlayerMoney>=unitsArray[selectedUnitMenu].price && check_other_units.length == 0 && check_enemy == 0 && cursorX <= cellWidth){
+							if(leftPlayerMoney>=unitsArray[selectedUnitMenu].price && check_other_units.length == 0 && check_enemy == 0 && cursorX <= 2*cellWidth && cursorX>0){
 								leftPlayerUnitsArray.push({
 									x: cursorX,
 									y: cursorY,
@@ -835,6 +853,14 @@ function game(){
 			totalUnits.text("Войска: "+leftPlayerUnitsArray.length);
 			break;
 	}
+	//
+	// Отрисовка хитбоксов игроков
+	leftHeroHitboxArray.forEach(function(item){
+		context.drawImage(heroHitBoxCell, item.x, item.y, cellWidth, cellHeight);
+	});
+	rightHeroHitboxArray.forEach(function(item){
+		context.drawImage(heroHitBoxCell, item.x, item.y, cellWidth, cellHeight);
+	});
 	//
 	// Отрисовка информации о выбранном в меню юните
 	if(selectedUnitMenu!="cursor"){
