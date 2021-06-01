@@ -17,6 +17,13 @@ var units = $("section.unit");
 var moneyPerTurn = $("section.info_player p.gold_per_tick");
 var playerPoints = $("section.info_player p.captured_points");
 var totalUnits = $("section.info_player p.units_on_battleground");
+
+var selectedUnitImage = $("section.info_selected_unit_img img");
+
+var selectedUnitHealth = $("section.info_selected_unit p.unit_hp");
+var selectedUnitDamage = $("section.info_selected_unit p.unit_dmg");
+var selectedUnitSpeed = $("section.info_selected_unit p.unit_energy");
+var selectedUnitRange = $("section.info_selected_unit p.unit_range");
 /////////// Переменные
 
 var cellWidth = 30;		// Ширина тайла.
@@ -287,7 +294,7 @@ function getStepCells(unit){
 		var x = item.x;
 		var y = item.y;
 		goldPointArray.forEach(function(item){
-			if(x==item.x && y==item.y && item.side == "none"){
+			if(x==item.x && y==item.y && item.side != playerTurn){
 				buildRadiusArray.push({
 					x:x,
 					y:y
@@ -757,6 +764,22 @@ function game(){
 		case "left":
 			totalUnits.text("Войска: "+leftPlayerUnitsArray.length);
 			break;
+	}
+	//
+	// Отрисовка информации о выбранном в меню юните
+	if(selectedUnitMenu!="cursor"){
+		selectedUnitHealth.text("Здоровье: "+unitsArray[selectedUnitMenu].health);
+		selectedUnitDamage.text("Урон: "+unitsArray[selectedUnitMenu].damage);
+		selectedUnitSpeed.text("Передвижение: "+unitsArray[selectedUnitMenu].speed+" кл/ход");
+		selectedUnitRange.text("Дальность атаки: "+unitsArray[selectedUnitMenu].range);
+		switch(playerTurn){
+			case "right":
+				selectedUnitImage.attr("src",unitsArray[selectedUnitMenu].rightImage.src);
+				break;
+			case "left":
+				selectedUnitImage.attr("src",unitsArray[selectedUnitMenu].leftImage.src);
+				break;
+		}
 	}
 	//
 	requestAnimationFrame(game);
