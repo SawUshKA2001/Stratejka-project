@@ -86,6 +86,10 @@ var mine_right = new Image();
 mine_right.src = "assets/images/tiles/mine_right.png";
 var relicPointCell = new Image();
 relicPointCell.src = "assets/images/tiles/relic_point.png";
+var leftRelicPoint =  new Image();
+leftRelicPoint.src = "assets/images/tiles/left_relic_point.png";
+var rightRelicPoint =  new Image();
+rightRelicPoint.src = "assets/images/tiles/right_relic_point.png";
 
 ////
 
@@ -208,6 +212,7 @@ function takeTurn(){
 				item.turnStep = 1;
 				item.turnAtack = 1;
 			});
+			relicUnitCoolDown--;
 			break;
 		case "right":
 			playerTurn = "left";
@@ -230,6 +235,7 @@ function takeTurn(){
 				item.turnAtack = 1;
 			});
 			turnCount+=1;
+			relicUnitCoolDown--;
 			break;
 	}
 }
@@ -301,6 +307,12 @@ function getStepCells(unit){
 				});
 			}
 		});
+		if(relicPoint.x == x && relicPoint.y == y && relicPoint.side!=playerTurn){
+			buildRadiusArray.push({
+				x:x,
+				y:y
+			});
+		}
 	});
 	if(unit.length>0 && unit[0].turnStep == 1){
 		for (var step = unit[0].speed; step>=0; step--) {
@@ -365,7 +377,28 @@ function unitMove(currentUnitArray){
 	var check_buildings = goldPointArray.filter(function(e){
 		return e.x==cursorX && e.y==cursorY && e.side != "none";
 	});
-	if(check_buildings.length == 0 && !(cursorX==relicPoint.x && cursorY==relicPoint.y)){
+	var check_step = stepCellArray.filter(function(e){
+		return e.x==cursorX && e.y==cursorY;
+	});
+	switch(playerTurn){
+		case "right":
+			var check_enemy = leftPlayerUnitsArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY;
+			});
+			var check_other_units = rightPlayerUnitsArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY && e.type != currentUnit[0].type;
+			});
+			break;
+		case "left":
+			var check_enemy = rightPlayerUnitsArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY;
+			});
+			var check_other_units = leftPlayerUnitsArray.filter(function(e){
+				return e.x==cursorX && e.y==cursorY && e.type != currentUnit[0].type;
+			});
+			break;
+	}
+	if(check_step.length > 0 && check_enemy.length == 0 && check_other_units == 0 && check_buildings.length == 0 && !(cursorX==relicPoint.x && cursorY==relicPoint.y)){
 		currentUnit.forEach(function(item){
 				item.x = cursorX;
 				item.y = cursorY;
@@ -475,6 +508,35 @@ function getCursorPosition(canvas, event) {
 						currentUnit[0].turnAtack = 0;
 					}
 				});
+				if(relicPoint.x == check_gold[0].x && relicPoint.y == check_gold[0].y){
+
+					if(relicPoint.currentHealth>0 ){
+						relicPoint.currentHealth-=currentUnit[0].damage*currentUnit.length;
+						if(relicPoint.currentHealth<=0){
+							relicPoint.side = "none";
+						}
+					}
+					else{
+						switch(playerTurn){
+							case "right":
+								if(rightPlayerMoney >= 300){
+									relicPoint.side = playerTurn;
+									rightPlayerMoney-=300;
+									relicPoint.currentHealth = relicPoint.maxHealth;
+									relicUnitCoolDown = 10;
+								}
+								break;
+							case "left":
+								if(leftPlayerMoney >= 300){
+									relicPoint.side = playerTurn;
+									leftPlayerMoney-=300;
+									relicPoint.currentHealth = relicPoint.maxHealth;
+									relicUnitCoolDown = 10;
+								}
+								break;
+						}
+					}
+				}
 				currentUnit = [];
 				buildRadiusArray = [];
 				stepCellArray = [];
@@ -488,6 +550,7 @@ function getCursorPosition(canvas, event) {
 					check_units = rightPlayerUnitsArray.filter(function(e){
 						return e.x==cursorX && e.y == cursorY;
 					});
+
 					break;
 				case "left":
 					check_units = leftPlayerUnitsArray.filter(function(e){
@@ -495,18 +558,37 @@ function getCursorPosition(canvas, event) {
 					});
 					break;
 			}
+			console.log(check_units);
 			if(check_units.length >= 2 && check_units[0].turnStep == 1){
 				if(check_units[0].y>0){
-					check_units[0].y -= cellHeight;
-					check_units[0].cellY -= 1;
-					check_units[0].turnStep = 0;
+					cursorY-=cellHeight;
+					currentUnit = [];
+					currentUnit.push(check_units[0]);
+					getStepCells(currentUnit);
+					switch(playerTurn){
+						case "right":
+							unitMove(rightPlayerUnitsArray);
+						case "left":
+							unitMove(leftPlayerUnitsArray);
+					}
 				}
 				else{
-					check_units[0].y += cellHeight;
-					check_units[0].cellY += 1;
-					check_units[0].turnStep = 0;
+					cursorY+=cellHeight;
+					currentUnit = [];
+					currentUnit.push(check_units[0]);
+					getStepCells(currentUnit);
+					switch(playerTurn){
+						case "right":
+							unitMove(rightPlayerUnitsArray);
+						case "left":
+							unitMove(leftPlayerUnitsArray);
+					}
 				}
 			}
+			currentUnit = [];
+			buildRadiusArray = [];
+			stepCellArray = [];
+			attackCellArray = [];
 		}
 	}
 	if(event.which==1) // левый клик
@@ -534,18 +616,7 @@ function getCursorPosition(canvas, event) {
 										}
 									}
 									if(stepCellArray.length > 0){
-										var check_step = stepCellArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY;
-										});
-										var check_enemy = leftPlayerUnitsArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY;
-										});
-										var check_other_units = rightPlayerUnitsArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY && e.type != currentUnit[0].type;
-										});
-										if(check_step.length > 0 && check_enemy.length == 0 && check_other_units == 0){
-											unitMove(rightPlayerUnitsArray);
-										}
+										unitMove(rightPlayerUnitsArray);
 									}
 									stepCellArray = [];
 									currentUnit = [];
@@ -578,18 +649,7 @@ function getCursorPosition(canvas, event) {
 										}
 									}
 									if(stepCellArray.length > 0){
-										var check_step = stepCellArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY;
-										});
-										var check_enemy = rightPlayerUnitsArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY;
-										});
-										var check_other_units = leftPlayerUnitsArray.filter(function(e){
-											return e.x==cursorX && e.y==cursorY && e.type != currentUnit[0].type;
-										});
-										if(check_step.length > 0 && check_enemy.length == 0 && check_other_units == 0){
-											unitMove(leftPlayerUnitsArray);
-										}
+										unitMove(leftPlayerUnitsArray);
 									}
 									stepCellArray = [];
 									currentUnit = [];
@@ -709,7 +769,17 @@ function game(){
 				break;
 		}
 	});
-	context.drawImage(relicPointCell, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
+	switch(relicPoint.side){
+		case "none":
+			context.drawImage(relicPointCell, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
+			break;
+		case "right":
+			context.drawImage(rightRelicPoint, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
+			break;
+		case "left":
+			context.drawImage(leftRelicPoint, relicPoint.x, relicPoint.y, cellWidth, cellHeight);
+			break;
+	}
 	//
 	// Отрисовка юнитов на поле
 	if(leftPlayerUnitsArray.length > 0){
