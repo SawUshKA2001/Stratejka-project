@@ -14,6 +14,9 @@ var endOfTurn = $("section.end_step_button button");
 
 var units = $("section.unit");
 
+var moneyPerTurn = $("section.info_player p.gold_per_tick");
+var playerPoints = $("section.info_player p.captured_points");
+var totalUnits = $("section.info_player p.units_on_battleground");
 /////////// Переменные
 
 var cellWidth = 30;		// Ширина тайла.
@@ -740,6 +743,21 @@ function game(){
 	rightPlayerHealthRender.text(rightPlayerHealth);
 	leftPlayerMoneyRender.text(leftPlayerMoney);
 	rightPlayerMoneyRender.text(rightPlayerMoney);
+	//
+	// Отрисовка информации игроков в нижнем меню
+	var check_mines = goldPointArray.filter(function(e){
+		return e.side == playerTurn;
+	});
+	moneyPerTurn.text("Золота за ход: "+((check_mines.length+1)*50));
+	playerPoints.text("Построено шахт: "+check_mines.length);
+	switch(playerTurn){
+		case "right":
+			totalUnits.text("Войска: "+rightPlayerUnitsArray.length);
+			break;
+		case "left":
+			totalUnits.text("Войска: "+leftPlayerUnitsArray.length);
+			break;
+	}
 	//
 	requestAnimationFrame(game);
 }
