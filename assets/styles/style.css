@@ -56,15 +56,16 @@ section.right_player{
 }
 
 section.unit{
-	width: 120px;
-	height: 120px;
-	padding: 20px 90px;
+	width: 140px;
+	height: 140px;
 	float: left;
+    align-items: center;
 }
 section.unit img{
-	width:100px;
+	width:80px;
 	height: 80px;
 	float: left;
+    margin: 30px 30px;
     
 }
 p.info{
@@ -76,6 +77,9 @@ section.info img{
 	float: left;
 	width: 50px;
 	height: 50px;
+}
+section.info {
+    width: 280px;
 }
 /*-----------Нижний интерфейс------------*/
 section.bottom_ui{
@@ -140,6 +144,13 @@ section.end_step_button button{
 section.end_step_button button:hover {
   box-shadow: 0 0 10px 0 red inset, 0 0 10px 4px red;
   color: #F137A6
+}
+
+div.section_flexbox{
+    display: flex;
+    height: 540px;
+    width: 280px;
+    flex-wrap: wrap;
 }
 /*--------------------------*/
 .select_unit{

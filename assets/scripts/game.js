@@ -110,7 +110,10 @@ var leftThiccRat = new Image();
 leftThiccRat.src = "assets/images/units/left_thicc-rat.png";
 var rightThiccRat = new Image();
 rightThiccRat.src = "assets/images/units/right_thicc-rat.png";
-
+var leftMouce = new Image();
+leftMouce.src = "assets/images/units/left_mouce.png";
+var rightMouce = new Image();
+rightMouce.src = "assets/images/units/right_mouce.png";
 //
 
 // Список юнитов
@@ -132,6 +135,15 @@ var unitsArray = {
 		price: 150,
 		leftImage: leftThiccRat,
 		rightImage: rightThiccRat
+	},
+	mouce:{
+		health: 40,
+		damage: 7,
+		speed: 5,
+		range: 1,
+		price: 25,
+		leftImage: leftMouce,
+		rightImage: rightMouce
 	}
 };
 //
@@ -372,10 +384,26 @@ function getAttackCells(){
 						});
 					}
 				});
+				rightHeroHitboxArray.forEach(function(item){
+					if(Math.pow((currentUnit[0].x - item.x),2) + Math.pow((currentUnit[0].y - item.y),2) <= Math.pow(currentUnit[0].range*cellWidth, 2)){
+						attackCellArray.push({
+							x:item.x,
+							y:item.y
+						});
+					}
+				});
 				break;
 			case "right":
 				leftPlayerUnitsArray.forEach(function(item){
 					if(Math.pow((currentUnit[0].cellX - item.cellX),2) + Math.pow((currentUnit[0].cellY - item.cellY),2) <= Math.pow(currentUnit[0].range, 2)){
+						attackCellArray.push({
+							x:item.x,
+							y:item.y
+						});
+					}
+				});
+				leftHeroHitboxArray.forEach(function(item){
+					if(Math.pow((currentUnit[0].x - item.x),2) + Math.pow((currentUnit[0].y - item.y),2) <= Math.pow(currentUnit[0].range*cellWidth, 2)){
 						attackCellArray.push({
 							x:item.x,
 							y:item.y
@@ -432,7 +460,7 @@ function unitMove(currentUnitArray){
 
 //// Атака юнитов
 
-function unitAttack(currentUnitArray){
+function unitAttack(currentUnitArray, currentHitBoxArray){
 	var negativeHealth = 0;
 	for(var i = currentUnitArray.length-1; i>=0; i--){
 		if(currentUnitArray[i].x == cursorX && currentUnitArray[i].y == cursorY){
@@ -458,6 +486,21 @@ function unitAttack(currentUnitArray){
 			currentUnitArray.splice(i,1);
 		}
 	}
+
+	currentHitBoxArray.forEach(function(item){
+		if(item.x == cursorX && item.y == cursorY){
+			switch(playerTurn){
+				case "right":
+					leftPlayerHealth-=currentUnit[0].damage*currentUnit.length;
+					console.log("Uh oh!");
+					break;
+				case "left":
+					rightPlayerHealth-=currentUnit[0].damage*currentUnit.length;
+					console.log("Uh oh!");
+					break;
+			}
+		}
+	});
 }
 
 ////
@@ -630,7 +673,7 @@ function getCursorPosition(canvas, event) {
 											return e.x==cursorX && e.y==cursorY;
 										});
 										if(check_attack.length > 0){
-											unitAttack(leftPlayerUnitsArray);
+											unitAttack(leftPlayerUnitsArray,leftHeroHitboxArray);
 										}
 									}
 									if(stepCellArray.length > 0){
@@ -663,7 +706,7 @@ function getCursorPosition(canvas, event) {
 											return e.x==cursorX && e.y==cursorY;
 										});
 										if(check_attack.length > 0){
-											unitAttack(rightPlayerUnitsArray);
+											unitAttack(rightPlayerUnitsArray,rightHeroHitboxArray);
 										}
 									}
 									if(stepCellArray.length > 0){
