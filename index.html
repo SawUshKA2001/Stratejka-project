@@ -19,7 +19,6 @@
 				<img src="assets/images/icons/health.png" alt="health">
 				<p class="info health"></p>
 			</section>
-			
 			<div class="section_flexbox">
                 <section class="unit" name="rat">
                     <img src="assets/images/units/rat_left.jpg" alt="left_rat">
@@ -36,13 +35,11 @@
                 <section class="unit" name="cursor">
                     <img src="assets/images/icons/cursor.png" alt="cursor">
                 </section>
-                <!-- <section class="unit" name="cursor1">
-                    <img src="assets/images/icons/cursor.png" alt="cursor">
-                </section> -->
+                <section class="unit relic-unit non-display" name="relicFloppa">
+                    <img src="assets/images/units/left_relic_floppa.png" alt="left_relic_floppa">
+                </section>
 			</div>
-			
 		</section>
-		
 		<section class="ui">
             <canvas id="gameScreen"></canvas>	
             <section class="bottom_ui">
@@ -55,6 +52,7 @@
                 	<img src="assets/images/units/rat_left.jpg" alt="selected_unit">
                 </section>
                 <section class="info_selected_unit non-display">
+                    <p class="unit_price"></p>
                     <p class="unit_hp"></p>
                     <p class="unit_dmg"></p>
                     <p class="unit_energy"></p>
@@ -65,7 +63,6 @@
                 </section>
             </section>
         </section>
-		    
 		<section class="player_menu right_player non-display">
 			<section class="info">
 				<img src="assets/images/icons/money.png" alt="money">
@@ -73,9 +70,6 @@
 				<img src="assets/images/icons/health.png" alt="health">
 				<p class="info health"></p>
 			</section>
-			
-			
-			
 			<div class="section_flexbox">
                 <section class="unit" name="rat">
                     <img src="assets/images/units/rat_right.jpg" alt="right_rat">
@@ -92,31 +86,15 @@
                 <section class="unit" name="cursor">
                     <img src="assets/images/icons/cursor.png" alt="cursor">
                 </section>
-                <!-- <section class="unit" name="cursor1">
-                    <img src="assets/images/icons/cursor.png" alt="cursor">
-                </section> -->
+                <section class="unit relic-unit non-display" name="relicFloppa">
+                    <img src="assets/images/units/right_relic_floppa.png" alt="right_relic_floppa">
+                </section>
 			</div>
-			
-<!--
-			<section class="unit" name="rat">
-				<img src="assets/images/units/rat_right.jpg" alt="right_rat">
-			</section>
-			<section class="unit" name="thiccRat">
-				<img src="assets/images/units/right_thicc-rat.png" alt="right_thicc-rat">
-			</section>
-			<section class="unit" name="cursor">
-				<img src="assets/images/icons/cursor.png" alt="cursor">
-			</section>
--->
-			
-			
 		</section>
 	</div>
 	<div class="end_game">
-		
+		<!-- Экран конца игры! -->
 	</div>
-	
-
 	<script type="text/javascript" src="assets/scripts/game.js"></script>
 </body>
 </html>

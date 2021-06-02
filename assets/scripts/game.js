@@ -20,10 +20,14 @@ var totalUnits = $("section.info_player p.units_on_battleground");
 
 var selectedUnitImage = $("section.info_selected_unit_img img");
 
+var selectedUnitPrice = $("section.info_selected_unit p.unit_price");
 var selectedUnitHealth = $("section.info_selected_unit p.unit_hp");
 var selectedUnitDamage = $("section.info_selected_unit p.unit_dmg");
 var selectedUnitSpeed = $("section.info_selected_unit p.unit_energy");
 var selectedUnitRange = $("section.info_selected_unit p.unit_range");
+
+var leftRelicUnit = $("section.left_player div.section_flexbox section.relic-unit");
+var rightRelicUnit = $("section.right_player div.section_flexbox section.relic-unit");
 /////////// Переменные
 
 var cellWidth = 30;		// Ширина тайла.
@@ -118,6 +122,11 @@ var rightMouceRider =  new Image();
 rightMouceRider.src = "assets/images/units/right_mouce_rider.png";
 var leftMouceRider =  new Image();
 leftMouceRider.src = "assets/images/units/left_mouce_rider.png";
+var leftRelicFloppa =  new Image();
+leftRelicFloppa.src = "assets/images/units/left_relic_floppa.png";
+var rightRelicFloppa =  new Image();
+rightRelicFloppa.src = "assets/images/units/right_relic_floppa.png";
+
 //
 
 // Список юнитов
@@ -157,6 +166,15 @@ var unitsArray = {
 		price: 250,
 		leftImage: leftMouceRider,
 		rightImage: rightMouceRider
+	},
+	relicFloppa:{
+		health: 500,
+		damage: 70,
+		speed: 3,
+		range: 2,
+		price: 500,
+		leftImage: leftRelicFloppa,
+		rightImage: rightRelicFloppa
 	}
 };
 //
@@ -256,6 +274,12 @@ function takeTurn(){
 				item.turnAtack = 1;
 			});
 			relicUnitCoolDown--;
+			if(relicUnitCoolDown<=0 && relicPoint.side == "right"){
+				rightRelicUnit.removeClass("non-display");
+			}
+			else{
+				rightRelicUnit.addClass("non-display");
+			}
 			break;
 		case "right":
 			playerTurn = "left";
@@ -279,6 +303,12 @@ function takeTurn(){
 			});
 			turnCount+=1;
 			relicUnitCoolDown--;
+			if(relicUnitCoolDown<=0 && relicPoint.side == "left"){
+				leftRelicUnit.removeClass("non-display");
+			}
+			else{
+				leftRelicUnit.addClass("non-display");
+			}
 			break;
 	}
 }
@@ -920,6 +950,7 @@ function game(){
 	//
 	// Отрисовка информации о выбранном в меню юните
 	if(selectedUnitMenu!="cursor"){
+		selectedUnitPrice.text("Цена: "+unitsArray[selectedUnitMenu].price);
 		selectedUnitHealth.text("Здоровье: "+unitsArray[selectedUnitMenu].health);
 		selectedUnitDamage.text("Урон: "+unitsArray[selectedUnitMenu].damage);
 		selectedUnitSpeed.text("Передвижение: "+unitsArray[selectedUnitMenu].speed+" кл/ход");
