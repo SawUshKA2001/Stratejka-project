@@ -600,16 +600,22 @@ function getCursorPosition(canvas, event) {
 			else if(check_gold.length>0 && currentUnit[0].turnAtack == 1){
 				goldPointArray.forEach(function(item){
 					if(check_gold[0].x == item.x && check_gold[0].y == item.y){
-						item.side = playerTurn;
 						switch(playerTurn){
 							case "right":
-								rightPlayerMoney -= 100;
+								if(rightPlayerMoney>=100){
+									rightPlayerMoney -= 100;
+									item.side = playerTurn;
+									currentUnit[0].turnAtack = 0;
+								}
 								break;
 							case "left":
-								leftPlayerMoney -= 100;
+								if(leftPlayerMoney>=100){
+									leftPlayerMoney -= 100;
+									item.side = playerTurn;
+									currentUnit[0].turnAtack = 0;
+								}
 								break;
 						}
-						currentUnit[0].turnAtack = 0;
 					}
 				});
 				if(relicPoint.x == check_gold[0].x && relicPoint.y == check_gold[0].y){
