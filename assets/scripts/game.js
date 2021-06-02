@@ -114,6 +114,10 @@ var leftMouce = new Image();
 leftMouce.src = "assets/images/units/left_mouce.png";
 var rightMouce = new Image();
 rightMouce.src = "assets/images/units/right_mouce.png";
+var rightMouceRider =  new Image();
+rightMouceRider.src = "assets/images/units/right_mouce_rider.png";
+var leftMouceRider =  new Image();
+leftMouceRider.src = "assets/images/units/left_mouce_rider.png";
 //
 
 // Список юнитов
@@ -144,6 +148,15 @@ var unitsArray = {
 		price: 25,
 		leftImage: leftMouce,
 		rightImage: rightMouce
+	},
+	mouceRider:{
+		health: 150,
+		damage: 35,
+		speed: 5,
+		range: 1,
+		price: 250,
+		leftImage: leftMouceRider,
+		rightImage: rightMouceRider
 	}
 };
 //
