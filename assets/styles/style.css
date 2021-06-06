@@ -55,13 +55,17 @@ section.right_player{
 	background: blue; 
 }
 
-section.unit{
+section.unit,
+section.spell,
+section.spell-button{
 	width: 140px;
 	height: 140px;
 	float: left;
     align-items: center;
 }
-section.unit img{
+section.unit img,
+section.spell img,
+section.spell-button img{
 	width:80px;
 	height: 80px;
 	float: left;
@@ -146,7 +150,8 @@ section.end_step_button button:hover {
   color: #F137A6
 }
 
-div.section_flexbox{
+div.unit-menu,
+div.spell-menu{
     display: flex;
     height: 540px;
     width: 280px;

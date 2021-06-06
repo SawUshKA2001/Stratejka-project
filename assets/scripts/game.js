@@ -4,6 +4,8 @@ var context = canvas.getContext("2d");
 var leftPlayerMenu = $("section.left_player");
 var rightPlayerMenu = $("section.right_player");
 
+var menuSwap = $("section.spell-button");
+
 var leftPlayerHealthRender = $("section.left_player section.info p.health");
 var rightPlayerHealthRender = $("section.right_player section.info p.health");
 
@@ -13,6 +15,7 @@ var rightPlayerMoneyRender = $("section.right_player section.info p.money");
 var endOfTurn = $("section.end_step_button button");
 
 var units = $("section.unit");
+var spells = $("section.spell"); 
 
 var moneyPerTurn = $("section.info_player p.gold_per_tick");
 var playerPoints = $("section.info_player p.captured_points");
@@ -50,6 +53,7 @@ var relicPoint = {
 	maxHealth: 250,
 	currentHealth: 0
 };
+var spellRadius = [];	// Массив тайлов задеваемых спелом
 
 var leftHeroHitboxArray = [];
 var rightHeroHitboxArray = [];
@@ -61,6 +65,7 @@ var playerTurn = "left";	// Переменная содержащая инфор
 var turnCount = 0;
 
 var selectedUnitMenu = "cursor";	// Имя выбранного в меню покупки юнита 
+var selectedSpellMenu = "none";		// Имя выбранного спела
 
 var leftPlayerUnitsArray = [];	// Список юнитов левого игрока
 var rightPlayerUnitsArray = [];	// Список юнитов правого игрока
@@ -179,6 +184,37 @@ var unitsArray = {
 };
 //
 
+// Список спелов
+
+var spellArray = {
+	healing:{
+		amount: 200,
+		price: 200,
+		range: 1
+	},
+	fireBall:{
+		range: 0,
+		price: 100,
+		damage: 100
+	},
+	explodion:{
+		range: 2,
+		price: 250,
+		damage: 100
+	},
+	armageddon:{
+		damage: 300,
+		price: 1000
+	},
+	ratMarines:{
+		spawn: "mouce",
+		amount: 4,
+		price: 200
+	}
+};
+
+//
+
 ////
 
 ///////////
@@ -239,6 +275,89 @@ console.log(goldPointArray);
 
 /////////// Функции
 
+menuSwap.click(function(){
+	if(selectedSpellMenu != "none"){
+		selectedSpellMenu = "none";
+		spellRadius = [];
+	}
+});
+
+let gamerMonitor = document.getElementById("gameScreen");
+gamerMonitor.onmouseover = gamerMonitor.onmouseout = gamerMonitor.onmousemove = getMouseHover;
+//// Проверка нахождения курсора над тайлами
+
+function getMouseHover(event){
+	if(selectedSpellMenu!="none" && selectedSpellMenu!="armageddon"){
+	    const rect = canvas.getBoundingClientRect()
+	    cursorX = Math.floor((event.clientX - rect.left)/cellWidth)*cellWidth;
+	    cursorY = Math.floor((event.clientY - rect.top)/cellHeight)*cellHeight;
+	    if(selectedSpellMenu=="ratMarines"){
+	    	spellRadius = [
+				{
+					x:cursorX,
+					y:cursorY
+				},
+				{
+					x:cursorX+cellWidth,
+					y:cursorY
+				},
+				{
+					x:cursorX+cellWidth,
+					y:cursorY+cellHeight
+				},
+				{
+					x:cursorX,
+					y:cursorY+cellHeight
+				},
+				{
+					x:cursorX-cellWidth,
+					y:cursorY+cellHeight
+				},
+				{
+					x:cursorX-cellWidth,
+					y:cursorY
+				},
+				{
+					x:cursorX-cellWidth,
+					y:cursorY-cellHeight
+				},
+				{
+					x:cursorX,
+					y:cursorY-cellHeight
+				},
+				{
+					x:cursorX+cellWidth,
+					y:cursorY-cellHeight
+				}
+			];
+	    }
+	    else{
+	    	spellRadius = [{
+	    		x:cursorX,
+	    		y:cursorY
+	    	}];
+	    	leftPlayerUnitsArray.forEach(function(item){
+	    		if(Math.pow((cursorX/cellWidth - item.cellX),2) + Math.pow((cursorY/cellHeight - item.cellY),2) <= Math.pow(spellArray[selectedSpellMenu].range, 2)){
+					spellRadius.push({
+						x:item.x,
+						y:item.y
+					});
+				}
+	    	});
+	    	rightPlayerUnitsArray.forEach(function(item){
+	    		if(Math.pow((cursorX/cellWidth - item.cellX),2) + Math.pow((cursorY/cellHeight - item.cellY),2) <= Math.pow(spellArray[selectedSpellMenu].range, 2)){
+					spellRadius.push({
+						x:item.x,
+						y:item.y
+					});
+				}
+	    	});
+	    }
+	}
+}
+
+////
+
 //// Рандомизация числа в диапозоне
 
 function getRandomInt(min, max) {
@@ -252,6 +371,8 @@ function getRandomInt(min, max) {
 function takeTurn(){
 	units.removeClass("select_unit");
 	selectedUnitMenu = "cursor";
+	selectedSpellMenu = "none";
+	spellRadius = [];
 	switch(playerTurn){
 		case "left":
 			playerTurn = "right";
@@ -327,6 +448,14 @@ endOfTurn.click(function(){
 
 function selectUnitMenu(unitName){
 	selectedUnitMenu = unitName;
+}
+
+////
+
+//// Занесение выбранного спела из меню
+
+function selectSpellMenu(spellName){
+	selectedSpellMenu = spellName;
 }
 
 ////
@@ -703,6 +832,86 @@ function getCursorPosition(canvas, event) {
 	}
 	if(event.which==1) // левый клик
 	{ 
+		if(selectedSpellMenu!="none"){
+			switch(selectedSpellMenu){
+				case "armageddon":
+					rightPlayerHealth-=spellArray[selectedSpellMenu].damage;
+					leftPlayerHealth-=spellArray[selectedSpellMenu].damage;
+					for(var i=0; i<leftPlayerUnitsArray.length; i++){
+						if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+							leftPlayerUnitsArray.splice(i,1);
+						}
+						else{
+							leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+						}
+					}
+					for(var i=0; i<rightPlayerUnitsArray.length; i++){
+						if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+							rightPlayerUnitsArray.splice(i,1);
+						}
+						else{
+							rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+						}
+					}
+					break;
+				case "healing":
+					spellRadius.forEach(function(item){
+						var x = item.x;
+						var y = item.y;
+						leftPlayerUnitsArray.forEach(function(item){
+							if(x==item.x&&y==item.y){
+								if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
+									item.currentHealth=item.maxHealth;
+								}
+								else{
+									item.currentHealth+=spellArray[selectedSpellMenu].amount;
+								}
+							}
+						});
+						rightPlayerUnitsArray.forEach(function(item){
+							if(x==item.x&&y==item.y){
+								if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
+									item.currentHealth=item.maxHealth;
+								}
+								else{
+									item.currentHealth+=spellArray[selectedSpellMenu].amount;
+								}
+							}
+						});
+					});
+					break;
+				case "ratMarines":
+
+					break;
+				default:
+					spellRadius.forEach(function(item){
+						var x = item.x;
+						var y = item.y;
+						for(var i=0; i<leftPlayerUnitsArray.length; i++){
+							if(x==leftPlayerUnitsArray[i].x&&y==leftPlayerUnitsArray[i].y){
+								if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+									leftPlayerUnitsArray.splice(i,1);
+								}
+								else{
+									leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+								}
+							}
+						}
+						for(var i=0; i<rightPlayerUnitsArray.length; i++){
+							if(x==rightPlayerUnitsArray[i].x&&y==rightPlayerUnitsArray[i].y){
+								if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+									rightPlayerUnitsArray.splice(i,1);
+								}
+								else{
+									rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+								}
+							}
+						}
+					});
+					break;
+			}
+		}
+		else{
 			switch(selectedUnitMenu){
 				case "cursor":
 					switch(playerTurn){
@@ -775,7 +984,7 @@ function getCursorPosition(canvas, event) {
 							break;
 					}
 					break;
-
+		
 		// Высадка юнитов на поле	
 				default:
 					switch(playerTurn){
@@ -834,9 +1043,11 @@ function getCursorPosition(canvas, event) {
 					}
 					break;
 			}
+		}
 		//
 	} 
 }
+
 
 ////
 
@@ -925,6 +1136,11 @@ function game(){
 		});
 	}
 	//
+	if(spellRadius!="none"){
+		spellRadius.forEach(function(item){
+			context.drawImage(cellAttack, item.x, item.y, cellWidth, cellHeight);
+		});
+	}
 	// Отрисовка денег и здоровья игроков
 	leftPlayerHealthRender.text(leftPlayerHealth);
 	rightPlayerHealthRender.text(rightPlayerHealth);
