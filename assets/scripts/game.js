@@ -1,6 +1,9 @@
 var canvas = document.getElementById("gameScreen");
 var context = canvas.getContext("2d");
 
+var gameZone = $("section.game");
+var end_game = $("div.end_game");
+
 var leftPlayerMenu = $("section.left_player");
 var rightPlayerMenu = $("section.right_player");
 
@@ -29,8 +32,8 @@ var selectedUnitDamage = $("section.info_selected_unit p.unit_dmg");
 var selectedUnitSpeed = $("section.info_selected_unit p.unit_energy");
 var selectedUnitRange = $("section.info_selected_unit p.unit_range");
 
-var leftRelicUnit = $("section.left_player div.section_flexbox section.relic-unit");
-var rightRelicUnit = $("section.right_player div.section_flexbox section.relic-unit");
+var leftRelicUnit = $("section.left_player section.unit-menu section.relic-unit");
+var rightRelicUnit = $("section.right_player section.unit-menu section.relic-unit");
 /////////// Переменные
 
 var cellWidth = 30;		// Ширина тайла.
@@ -131,11 +134,23 @@ var leftRelicFloppa =  new Image();
 leftRelicFloppa.src = "assets/images/units/left_relic_floppa.png";
 var rightRelicFloppa =  new Image();
 rightRelicFloppa.src = "assets/images/units/right_relic_floppa.png";
-
+var leftBuilder = new Image();
+leftBuilder.src = "assets/images/units/left_builder.jpg";
+var rightBuilder = new Image();
+rightBuilder.src = "assets/images/units/right_builder.jpg";
 //
 
 // Список юнитов
 var unitsArray = {
+	builder:{
+		health: 100,
+		damage: 10,
+		speed: 3,
+		range: 1,
+		price: 100,
+		leftImage: leftBuilder,
+		rightImage: rightBuilder
+	},
 	rat:{
 		health: 100,
 		damage: 20,
@@ -332,10 +347,7 @@ function getMouseHover(event){
 			];
 	    }
 	    else{
-	    	spellRadius = [{
-	    		x:cursorX,
-	    		y:cursorY
-	    	}];
+	    	spellRadius = [];
 	    	leftPlayerUnitsArray.forEach(function(item){
 	    		if(Math.pow((cursorX/cellWidth - item.cellX),2) + Math.pow((cursorY/cellHeight - item.cellY),2) <= Math.pow(spellArray[selectedSpellMenu].range, 2)){
 					spellRadius.push({
@@ -464,58 +476,60 @@ function selectSpellMenu(spellName){
 
 function getStepCells(unit){
 	currentUnit = unit;
-	var radius_cells = [
-				{
-					x:currentUnit[0].x+cellWidth,
-					y:currentUnit[0].y
-				},
-				{
-					x:currentUnit[0].x+cellWidth,
-					y:currentUnit[0].y+cellHeight
-				},
-				{
-					x:currentUnit[0].x,
-					y:currentUnit[0].y+cellHeight
-				},
-				{
-					x:currentUnit[0].x-cellWidth,
-					y:currentUnit[0].y+cellHeight
-				},
-				{
-					x:currentUnit[0].x-cellWidth,
-					y:currentUnit[0].y
-				},
-				{
-					x:currentUnit[0].x-cellWidth,
-					y:currentUnit[0].y-cellHeight
-				},
-				{
-					x:currentUnit[0].x,
-					y:currentUnit[0].y-cellHeight
-				},
-				{
-					x:currentUnit[0].x+cellWidth,
-					y:currentUnit[0].y-cellHeight
+	if(currentUnit[0].type == "builder"){
+		var radius_cells = [
+					{
+						x:currentUnit[0].x+cellWidth,
+						y:currentUnit[0].y
+					},
+					{
+						x:currentUnit[0].x+cellWidth,
+						y:currentUnit[0].y+cellHeight
+					},
+					{
+						x:currentUnit[0].x,
+						y:currentUnit[0].y+cellHeight
+					},
+					{
+						x:currentUnit[0].x-cellWidth,
+						y:currentUnit[0].y+cellHeight
+					},
+					{
+						x:currentUnit[0].x-cellWidth,
+						y:currentUnit[0].y
+					},
+					{
+						x:currentUnit[0].x-cellWidth,
+						y:currentUnit[0].y-cellHeight
+					},
+					{
+						x:currentUnit[0].x,
+						y:currentUnit[0].y-cellHeight
+					},
+					{
+						x:currentUnit[0].x+cellWidth,
+						y:currentUnit[0].y-cellHeight
+					}
+				];
+		radius_cells.forEach(function(item){
+			var x = item.x;
+			var y = item.y;
+			goldPointArray.forEach(function(item){
+				if(x==item.x && y==item.y && item.side != playerTurn){
+					buildRadiusArray.push({
+						x:x,
+						y:y
+					});
 				}
-			];
-	radius_cells.forEach(function(item){
-		var x = item.x;
-		var y = item.y;
-		goldPointArray.forEach(function(item){
-			if(x==item.x && y==item.y && item.side != playerTurn){
+			});
+			if(relicPoint.x == x && relicPoint.y == y && relicPoint.side!=playerTurn){
 				buildRadiusArray.push({
 					x:x,
 					y:y
 				});
 			}
 		});
-		if(relicPoint.x == x && relicPoint.y == y && relicPoint.side!=playerTurn){
-			buildRadiusArray.push({
-				x:x,
-				y:y
-			});
-		}
-	});
+	}
 	if(unit.length>0 && unit[0].turnStep == 1){
 		for (var step = unit[0].speed; step>=0; step--) {
 			for (var i = step; i>0; i--){
@@ -833,82 +847,170 @@ function getCursorPosition(canvas, event) {
 	if(event.which==1) // левый клик
 	{ 
 		if(selectedSpellMenu!="none"){
-			switch(selectedSpellMenu){
-				case "armageddon":
-					rightPlayerHealth-=spellArray[selectedSpellMenu].damage;
-					leftPlayerHealth-=spellArray[selectedSpellMenu].damage;
-					for(var i=0; i<leftPlayerUnitsArray.length; i++){
-						if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
-							leftPlayerUnitsArray.splice(i,1);
-						}
-						else{
-							leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
-						}
-					}
-					for(var i=0; i<rightPlayerUnitsArray.length; i++){
-						if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
-							rightPlayerUnitsArray.splice(i,1);
-						}
-						else{
-							rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
-						}
-					}
+			var currentMoney;
+			switch(playerTurn){
+				case "right":
+					currentMoney = rightPlayerMoney;
 					break;
-				case "healing":
-					spellRadius.forEach(function(item){
-						var x = item.x;
-						var y = item.y;
-						leftPlayerUnitsArray.forEach(function(item){
-							if(x==item.x&&y==item.y){
-								if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
-									item.currentHealth=item.maxHealth;
+				case "left":
+					currentMoney = leftPlayerMoney;
+					break;
+			}
+			if(currentMoney>=spellArray[selectedSpellMenu].price){
+				switch(selectedSpellMenu){
+					case "armageddon":
+						rightPlayerHealth-=spellArray[selectedSpellMenu].damage;
+						leftPlayerHealth-=spellArray[selectedSpellMenu].damage;
+						for(var i=leftPlayerUnitsArray.length-1; i>=0; i--){
+							if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+								leftPlayerUnitsArray.splice(i,1);
+							}
+							else{
+								leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+							}
+						}
+						for(var i=rightPlayerUnitsArray.length-1; i>=0; i--){
+							if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+								rightPlayerUnitsArray.splice(i,1);
+							}
+							else{
+								rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+							}
+						}
+						break;
+					case "healing":
+						spellRadius.forEach(function(item){
+							var x = item.x;
+							var y = item.y;
+							leftPlayerUnitsArray.forEach(function(item){
+								if(x==item.x&&y==item.y){
+									if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
+										item.currentHealth=item.maxHealth;
+									}
+									else{
+										item.currentHealth+=spellArray[selectedSpellMenu].amount;
+									}
 								}
-								else{
-									item.currentHealth+=spellArray[selectedSpellMenu].amount;
+							});
+							rightPlayerUnitsArray.forEach(function(item){
+								if(x==item.x&&y==item.y){
+									if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
+										item.currentHealth=item.maxHealth;
+									}
+									else{
+										item.currentHealth+=spellArray[selectedSpellMenu].amount;
+									}
+								}
+							});
+						});
+						break;
+					case "ratMarines":
+						var unitAmount = 0;
+						while(unitAmount != spellArray[selectedSpellMenu].amount){
+							var spawnPlace = getRandomInt(0, spellRadius.length-1);
+							var check_enemy;
+							var check_units;
+							var check_buildings;
+							var check_relic;
+							switch(playerTurn){
+								case "left":
+									check_enemy = rightPlayerUnitsArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y;
+									});
+									check_units = leftPlayerUnitsArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y && e.type!=spellArray[selectedSpellMenu].spawn;
+									});
+									check_buildings = goldPointArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y && e.side!="none";
+									});
+									check_relic = spellRadius[spawnPlace].x == relicPoint.x && spellRadius[spawnPlace].y == relicPoint.y;
+									if(check_enemy.length==0 && check_units.length==0 && check_buildings.length==0 && check_relic==0){
+										leftPlayerUnitsArray.push({
+											x: spellRadius[spawnPlace].x,
+											y: spellRadius[spawnPlace].y,
+											cellX: spellRadius[spawnPlace].x/cellWidth,
+											cellY: spellRadius[spawnPlace].y/cellHeight,
+											type: spellArray[selectedSpellMenu].spawn,
+											maxHealth: unitsArray[spellArray[selectedSpellMenu].spawn].health,
+											currentHealth: unitsArray[spellArray[selectedSpellMenu].spawn].health,
+											damage: unitsArray[spellArray[selectedSpellMenu].spawn].damage,
+											speed: unitsArray[spellArray[selectedSpellMenu].spawn].speed,
+											range: unitsArray[spellArray[selectedSpellMenu].spawn].range,
+											img: unitsArray[spellArray[selectedSpellMenu].spawn].leftImage,
+											turnStep: 0,
+											turnAtack: 0
+										});
+										unitAmount++;
+									}
+									break;
+								case "right":
+									check_enemy = leftPlayerUnitsArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y;
+									});
+									check_units = rightPlayerUnitsArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y && e.type!=spellArray[selectedSpellMenu].spawn;
+									});
+									check_buildings = goldPointArray.filter(function(e){
+										return e.x==spellRadius[spawnPlace].x && e.y==spellRadius[spawnPlace].y && e.side!="none";
+									});
+									check_relic = spellRadius[spawnPlace].x == relicPoint.x && spellRadius[spawnPlace].y == relicPoint.y;
+									if(check_enemy.length==0 && check_units.length==0 && check_buildings.length==0 && check_relic==0){
+										rightPlayerUnitsArray.push({
+											x: spellRadius[spawnPlace].x,
+											y: spellRadius[spawnPlace].y,
+											cellX: spellRadius[spawnPlace].x/cellWidth,
+											cellY: spellRadius[spawnPlace].y/cellHeight,
+											type: spellArray[selectedSpellMenu].spawn,
+											maxHealth: unitsArray[spellArray[selectedSpellMenu].spawn].health,
+											currentHealth: unitsArray[spellArray[selectedSpellMenu].spawn].health,
+											damage: unitsArray[spellArray[selectedSpellMenu].spawn].damage,
+											speed: unitsArray[spellArray[selectedSpellMenu].spawn].speed,
+											range: unitsArray[spellArray[selectedSpellMenu].spawn].range,
+											img: unitsArray[spellArray[selectedSpellMenu].spawn].rightImage,
+											turnStep: 0,
+											turnAtack: 0
+										});
+										unitAmount++;
+									}
+									break;
+							}
+						}
+						break;
+					default:
+						spellRadius.forEach(function(item){
+							var x = item.x;
+							var y = item.y;
+							for(var i=0; i<leftPlayerUnitsArray.length; i++){
+								if(x==leftPlayerUnitsArray[i].x&&y==leftPlayerUnitsArray[i].y){
+									if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+										leftPlayerUnitsArray.splice(i,1);
+									}
+									else{
+										leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+									}
+								}
+							}
+							for(var i=0; i<rightPlayerUnitsArray.length; i++){
+								if(x==rightPlayerUnitsArray[i].x&&y==rightPlayerUnitsArray[i].y){
+									if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
+										rightPlayerUnitsArray.splice(i,1);
+									}
+									else{
+										rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
+									}
 								}
 							}
 						});
-						rightPlayerUnitsArray.forEach(function(item){
-							if(x==item.x&&y==item.y){
-								if(item.currentHealth+spellArray[selectedSpellMenu].amount>item.maxHealth){
-									item.currentHealth=item.maxHealth;
-								}
-								else{
-									item.currentHealth+=spellArray[selectedSpellMenu].amount;
-								}
-							}
-						});
-					});
-					break;
-				case "ratMarines":
-
-					break;
-				default:
-					spellRadius.forEach(function(item){
-						var x = item.x;
-						var y = item.y;
-						for(var i=0; i<leftPlayerUnitsArray.length; i++){
-							if(x==leftPlayerUnitsArray[i].x&&y==leftPlayerUnitsArray[i].y){
-								if(leftPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
-									leftPlayerUnitsArray.splice(i,1);
-								}
-								else{
-									leftPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
-								}
-							}
-						}
-						for(var i=0; i<rightPlayerUnitsArray.length; i++){
-							if(x==rightPlayerUnitsArray[i].x&&y==rightPlayerUnitsArray[i].y){
-								if(rightPlayerUnitsArray[i].currentHealth-spellArray[selectedSpellMenu].damage<=0){
-									rightPlayerUnitsArray.splice(i,1);
-								}
-								else{
-									rightPlayerUnitsArray[i].currentHealth-=spellArray[selectedSpellMenu].damage;
-								}
-							}
-						}
-					});
-					break;
+						break;
+				}
+				switch(playerTurn){
+					case "right":
+						rightPlayerMoney-=spellArray[selectedSpellMenu].price;
+						break;
+					case "left":
+						leftPlayerMoney-=spellArray[selectedSpellMenu].price;
+						break;
+				}
 			}
 		}
 		else{
@@ -1187,6 +1289,12 @@ function game(){
 		}
 	}
 	//
+
+	if(leftPlayerHealth<=0||rightPlayerHealth<=0){
+		gameZone.addClass("non-display");
+		end_game.removeClass("non-display");
+	}
+
 	requestAnimationFrame(game);
 }
 

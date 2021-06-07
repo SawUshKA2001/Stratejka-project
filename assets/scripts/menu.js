@@ -3,7 +3,7 @@ $(document).ready(function(){
 	var selectedUnitInfo = $("section.info_selected_unit");
 	var startButton = $("input.play");
 	var menu = $("div.menu");
-	var gameZone = $("div.game");
+	var gameZone = $("section.game");
 	var units = $("section.unit");
 	var spells = $("section.spell");
 	var endOfTurn = $("section.end_step_button button");
