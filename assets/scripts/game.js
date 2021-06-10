@@ -93,6 +93,8 @@ var cellSand = new Image();
 cellSand.src = "assets/images/tiles/sand.png";
 var cellAttack = new Image();
 cellAttack.src = "assets/images/tiles/attack.png";
+var cellMark = new Image();
+cellMark.src = "assets/images/tiles/mark.png";
 var goldPoint = new Image();
 goldPoint.src = "assets/images/tiles/gold_point.png";
 var mine_left = new Image();
@@ -1234,13 +1236,13 @@ function game(){
 	// Отрисовка точек где можно строить
 	if(buildRadiusArray.length > 0){
 		buildRadiusArray.forEach(function(item){
-			context.drawImage(cellAttack, item.x, item.y, cellWidth, cellHeight);
+			context.drawImage(cellMark, item.x, item.y, cellWidth, cellHeight);
 		});
 	}
 	//
 	if(spellRadius!="none"){
 		spellRadius.forEach(function(item){
-			context.drawImage(cellAttack, item.x, item.y, cellWidth, cellHeight);
+			context.drawImage(cellMark, item.x, item.y, cellWidth, cellHeight);
 		});
 	}
 	// Отрисовка денег и здоровья игроков
